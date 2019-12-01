@@ -5,12 +5,20 @@ A web browser version of the classic strategy board game 'Diplomacy'.
 ### Getting started
 
 Copy the example settings file:
-`cp project/settings.example.py project/settings.py` and change the
-`settings.py` file as necessary for local development:
+`cp project/settings/local.example.py project/settings.local.py` and change the
+`local.py` file as necessary for local development:
 
  * To make the project work without using Docker, uncomment the sections
    labelled `# NOTE non Docker setup` and comment out the corresponding
    sections (which are not commented out by default).
+   
+### Running the tests
+
+There local settings disable authentication on the service by default. This
+causes tests which rely on authentication to fail. Use the test settings when
+running the test suite:
+
+`./manage.py test --settings=project.settings.test`
 
 ### Loading fixtures for dev
 
