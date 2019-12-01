@@ -133,6 +133,37 @@ class JoinGame(views.APIView):
         )
 
 
+class FinalizeOrders(views.APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        game_id = kwargs['game']
+        game = get_object_or_404(models.Game, id=game_id)
+        if not game.status == GameStatus.ACTIVE:
+            return Response(
+                {'errors': {'status': ['Game is not active.']}},
+                status.HTTP_400_BAD_REQUEST,
+            )
+        if request.user not in game.participants.all():
+            return Response(
+                {'errors': {
+                    'data': ['User is not a participant in this game.']
+                }},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        turn = game.get_current_turn()
+        user_nation_state = models.NationState.objects.get(
+            turn=turn,
+            user=request.user,
+        )
+        user_nation_state.orders_finalized = True
+        user_nation_state.save()
+        return Response(
+            status=status.HTTP_200_OK,
+        )
+
+
 class OrderView(mixins.ListModelMixin,
                 mixins.CreateModelMixin,
                 generics.GenericAPIView):
