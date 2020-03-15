@@ -17,8 +17,21 @@ class TestPiece(OrderTestCase):
         wales = CoastalTerritory(2, "Wales", "England", [], [])
 
         army = Army("England", london)
-        London_hold = Hold("England", london)
-        Wales_hold = Hold("England", wales)
+        london_hold = Hold("England", london)
+        wales_hold = Hold("England", wales)
 
-        self.assertEqual(London_hold.piece, army)
-        self.assertIsNone(Wales_hold.piece)
+        self.assertEqual(london_hold.piece, army)
+        self.assertIsNone(wales_hold.piece)
+
+
+class TestIsOrder(OrderTestCase):
+
+    def test_hold(self):
+        london = CoastalTerritory(1, "London", "England", [], [])
+        Army("England", london)
+        london_hold = Hold("England", london)
+
+        self.assertTrue(london_hold.is_hold)
+        self.assertFalse(london_hold.is_move)
+        with self.assertRaises(AttributeError):
+            london_hold.is_fake_class_name

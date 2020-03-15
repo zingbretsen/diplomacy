@@ -1,5 +1,6 @@
 # relationships between territories. Look into observer pattern
 from .state import state
+from . import decisions
 
 
 class Territory:
@@ -16,6 +17,7 @@ class Territory:
         self._piece_cached = False
         self._attacking_pieces = []
         self._attacking_pieces_cached = False
+        self.hold_strength = decisions.HoldStrength(self)
 
     def __str__(self):
         return self.name
