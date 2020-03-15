@@ -4,7 +4,7 @@ from django.apps import apps
 from django.db import models
 
 from core.models.base import OrderState, OrderType, OutcomeType, \
-    HygenicModel, PieceType
+    HygenicModel, PerTurnModel, PieceType
 from core.models.mixins.checks import ChecksMixin
 from core.models.mixins.decisions import OrderDecisionsMixin
 from core.models.mixins.resolver import ResolverMixin
@@ -212,11 +212,11 @@ class OrderManager(models.Manager):
         return remaining_orders
 
 
-class Order(HygenicModel, ChecksMixin, OrderDecisionsMixin, ResolverMixin):
+class Order(PerTurnModel, HygenicModel, ChecksMixin, OrderDecisionsMixin, ResolverMixin):
     """
     """
-    nation_state = models.ForeignKey(
-        'NationState',
+    nation = models.ForeignKey(
+        'Nation',
         null=False,
         on_delete=models.CASCADE,
         related_name='orders',
@@ -231,8 +231,8 @@ class Order(HygenicModel, ChecksMixin, OrderDecisionsMixin, ResolverMixin):
         'Territory',
         on_delete=models.CASCADE,
         related_name='+',
-        null=True,
-        blank=True,
+        null=False,
+        blank=False,
     )
     target = models.ForeignKey(
         'Territory',
@@ -269,12 +269,10 @@ class Order(HygenicModel, ChecksMixin, OrderDecisionsMixin, ResolverMixin):
         choices=OutcomeType.CHOICES,
         max_length=25,
         null=True,
+        blank=True,
     )
 
     objects = OrderManager()
-
-    class Meta:
-        db_table = 'order'
 
     def __str__(self):
         return f'{self.source.piece.type} {self.source} {self.type}'
@@ -283,7 +281,7 @@ class Order(HygenicModel, ChecksMixin, OrderDecisionsMixin, ResolverMixin):
         """
         """
         try:
-            if self.piece.is_army:
+            if self.piece.type == PieceType.ARMY:
                 if self.target_coast:
                     raise ValueError('Army order cannot specify a target coast.')
                 if self.type == OrderType.CONVOY:
@@ -362,14 +360,6 @@ class Order(HygenicModel, ChecksMixin, OrderDecisionsMixin, ResolverMixin):
     @property
     def successful_supporting_orders(self):
         return self.supporting_orders.filter(illegal=False)
-
-    @property
-    def nation(self):
-        return self.order.nation
-
-    @property
-    def turn(self):
-        return self.order.turn
 
     @property
     def is_hold(self):

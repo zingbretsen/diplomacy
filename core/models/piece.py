@@ -4,10 +4,11 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext as _
 
-from core.models.base import HygenicModel, DislodgedState, PieceType
+from core.models.base import HygenicModel, PerTurnModel, DislodgedState, \
+    PieceType
 
 
-class Piece(HygenicModel):
+class Piece(HygenicModel, PerTurnModel):
     """
     Represents a piece during a turn.
 
@@ -23,22 +24,25 @@ class Piece(HygenicModel):
             'the same in game piece.'
         )
     )
-    nation_state = models.ForeignKey(
-        'NationState',
+    nation = models.ForeignKey(
+        'Nation',
         null=False,
         related_name='pieces',
         on_delete=models.CASCADE,
     )
-    territory = models.OneToOneField(
+    # NOTE should this use TerritoryState?
+    territory = models.ForeignKey(
         'Territory',
         null=True,
         on_delete=models.CASCADE,
+        related_name='pieces',
     )
-    named_coast = models.OneToOneField(
+    named_coast = models.ForeignKey(
         'NamedCoast',
         on_delete=models.CASCADE,
         blank=True,
-        null=True
+        null=True,
+        related_name='pieces',
     )
     type = models.CharField(
         max_length=50,
@@ -61,9 +65,6 @@ class Piece(HygenicModel):
         blank=True,
         related_name='retreat_pieces'
     )
-
-    class Meta:
-        db_table = "piece"
 
     def __str__(self):
         # TODO Fix this up and make it used in all the error messages. Also

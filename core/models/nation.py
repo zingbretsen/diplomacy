@@ -1,5 +1,8 @@
+from django.apps import apps
 from django.contrib.auth.models import User
 from django.db import models
+
+from core.models.base import PerTurnModel
 
 
 class Nation(models.Model):
@@ -15,9 +18,6 @@ class Nation(models.Model):
     name = models.CharField(
         max_length=15,
     )
-    active = models.BooleanField(
-        default=True,
-    )
 
     class Meta:
         db_table = "nation"
@@ -29,32 +29,70 @@ class Nation(models.Model):
         return self.name
 
 
-class NationState(models.Model):
+class NationState(PerTurnModel):
     """
     Through model between ``Turn``, ``User``, and ``Nation``. Represents the
     state of a nation in during a turn.
     """
-    turn = models.ForeignKey(
-        'Turn',
-        null=False,
-        related_name='nation_states',
-        on_delete=models.CASCADE,
-    )
     nation = models.ForeignKey(
         'Nation',
         null=False,
         related_name='+',
         on_delete=models.CASCADE,
     )
-    player = models.ForeignKey(
+    user = models.ForeignKey(
         User,
         null=True,
-        related_name='+',
+        related_name='nation_states',
         on_delete=models.CASCADE,
     )
     orders_finalized = models.BooleanField(
-        default=True,
+        default=False,
     )
     surrendered = models.BooleanField(
         default=False,
     )
+
+    @property
+    def num_supply_centers(self):
+        """
+        Gets the number of supply centers that the nation controls this turn.
+
+        Returns:
+            * `int`
+        """
+        # TODO test
+        TerritoryState = apps.get_model(
+            app_label='core',
+            model_name='TerritoryState'
+        )
+        return TerritoryState.objects.filter(
+            controlled_by=self.nation,
+            territory__supply_center=True,
+        ).count()
+
+    @property
+    def orders(self):
+        """
+        Gets the orders that the nation has submitted this turn.
+
+        Returns:
+            * `QuerySet`
+        """
+        # TODO test
+        Order = apps.get_model(app_label='core', model_name='Order')
+        return Order.objects.filter(
+            turn=self.turn,
+            nation=self.nation,
+        )
+
+    @property
+    def orders_remaining(self):
+        """
+        Gets the number of orders that the nation can still submit.
+
+        Returns:
+            * `int`
+        """
+        # TODO test
+        return self.num_supply_centers - self.orders.count()
