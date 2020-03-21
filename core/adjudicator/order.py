@@ -65,6 +65,7 @@ class Move(Order):
         self.via_convoy = via_convoy
         self._move_support_commands = []
         self._move_support_commands_cached = False
+        self.legal_decision = decisions.MoveLegal(self)
         self.move_decision = decisions.Move(self)
         self.path_decision = decisions.Path(self)
 

@@ -30,6 +30,7 @@ class Piece:
 
 
 class Army(Piece):
+
     def can_reach(self, target):
         """
         Determines whether the army can reach the given territory, regardless of whether the necessary conoying fleets exist or not.

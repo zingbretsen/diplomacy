@@ -1,3 +1,5 @@
+from core.adjudicator.exceptions import IllegalOrderException
+
 UNRESOLVED = 'unresolved'
 PATH = 'path'
 NO_PATH = 'no path'
@@ -6,6 +8,9 @@ SUCCEEDS = 'succeeds'
 FAILS = 'fails'
 MOVES = 'moves'
 GIVEN = 'given'
+
+LEGAL = 'legal'
+ILLEGAL = 'illegal'
 
 
 class ConvoyChain:
@@ -30,6 +35,36 @@ class Decision:
             return self.result
         self.result = self._resolve()
         return self.result
+
+
+# MoveDecision base class
+class MoveLegal(Decision):
+    """
+    For each piece ordered to move, the decision whether the move is legal.
+    """
+
+    def __init__(self, move):
+        self.move = move
+        self.result = UNRESOLVED
+        self.error_code = None
+
+    def _resolve(self):
+        # TODO unittest
+        piece = self.move.source.piece
+
+        if piece.nation != self.move.nation:
+            self.error_code = 'M001'
+            return ILLEGAL
+
+        if not self.move.via_convoy:
+            if not self.move.source.adjacent_to(self.move.target):
+                self.error_code = 'M002'
+                return ILLEGAL
+
+        if not self.move.source.piece.can_reach(self.move.target):
+            self.error_code = 'M003'
+            return ILLEGAL
+        return LEGAL
 
 
 class StrengthDecision(Decision):
