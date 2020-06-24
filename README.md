@@ -59,7 +59,7 @@ configuration files:
 
 ## Loading fixtures for development
 
-To load the fixtures run `make reset_db && make dev_fixtures && superuser` from the root directory
+To load the fixtures run `make reset_db && make dev_fixtures && make superuser` from the root directory
 (outside container). This resets the database, builds the fixtures in
 `fixtures/dev` and creates a superuser with the following credentials:
 ```
