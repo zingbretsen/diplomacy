@@ -46,8 +46,8 @@ development. Follow the docs to get Docker and Docker Compose installed.
 Run the following commands from the root directory to create local copies of
 configuration files:
 
-* Run `cp project/settings/local.example.py project/settings/local.py
-* Run `cp docker-compose.override.yml.example docker-compose.override.yml`
+* Run `cp project/settings/local.example.py project/settings/local.py`
+* Run `cp docker-compose.override.example.yml docker-compose.override.yml`
 
 ### Bring up local copy
 
